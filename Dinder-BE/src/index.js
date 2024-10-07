@@ -1,10 +1,11 @@
 const express = require("express");
 const connectDB = require("./config/Database");
 const app = express();
-const User = require("./models/user");
+const User = require("./models/user");//model
 
 app.use(express.json());//built-in middleware function in Express - parses incoming req json data 
 
+//saving data to database
 app.post("/signup",async(req,res)=>{
     const user = new User(req.body);
     await user.save();
@@ -33,7 +34,29 @@ app.get("/feed", async(req,res)=>{
     catch(err){
         res.status(404).send("something went wrong");
     }
-})
+});
+
+//deleting data from database
+app.delete("/user",async(req,res)=>{
+    try{
+        await User.deleteMany({firstName:req.body.firstName});
+        res.send("users deleted successfully");
+    }
+    catch(err){
+        res.status(404).send("something went wrong");
+    }
+});
+
+//update datatbase docs
+app.patch("/user", async(req,res)=>{
+    try{
+        await User.findByIdAndUpdate(req.body.userId,req.body);
+        res.send("updated successfully");
+    }
+    catch(err){
+        res.status(404).send("something went wrong");
+    }
+});
 
 connectDB().then(()=>{
 console.log("db connected");
