@@ -10,6 +10,29 @@ app.post("/signup",async(req,res)=>{
     await user.save();
     console.log("data inserted into user collection");
     res.send("user added");
+});
+
+//getting user by emailId
+app.get("/user", async(req,res)=>{
+    try{
+        const users = await User.findOne({}); //returns doc with smallest id among matched ones 
+        // and if you do not pass any filter - then also doc with smallest id is returned among all or any random doc
+        res.send(users);
+    }
+    catch(err){
+        res.status(404).send("something went wrong");
+    }
+});
+
+//getting all the users for the feed
+app.get("/feed", async(req,res)=>{
+    try{
+        const users = await User.find({});
+        res.send(users);
+    }
+    catch(err){
+        res.status(404).send("something went wrong");
+    }
 })
 
 connectDB().then(()=>{
