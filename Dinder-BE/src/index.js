@@ -54,6 +54,11 @@ app.delete("/user",async(req,res)=>{
 //update datatbase docs
 app.patch("/user", async(req,res)=>{
     try{
+        const ALLOWED_UPDATES = ["age", "gender", "description", "dpUrl"];
+        const isUpdateAllowed = Object.keys(req.body).every((k)=>ALLOWED_UPDATES.includes(k));
+        if(!isUpdateAllowed){
+            throw new error("update not allowed for these feilds");
+        }
         await User.findByIdAndUpdate(req.body.userId,req.body, {runValidators:true});//if any feilds does not match model- those feilds are not added or updated to db
         res.send("updated successfully");
     }
