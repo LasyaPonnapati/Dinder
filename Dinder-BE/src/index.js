@@ -7,21 +7,25 @@ app.use(express.json());//built-in middleware function in Express - parses incom
 
 //saving data to database
 app.post("/signup",async(req,res)=>{
+    try{
     const user = new User(req.body);
     await user.save();
-    console.log("data inserted into user collection");
     res.send("user added");
+    }
+    catch(err){
+        res.status(404).send("something went wrong" + err);
+    }
 });
 
 //getting user by emailId
 app.get("/user", async(req,res)=>{
     try{
-        const users = await User.findOne({}); //returns doc with smallest id among matched ones 
+        const users = await User.findOne({emailId: req.body.emailId}); //returns doc with smallest id among matched ones 
         // and if you do not pass any filter - then also doc with smallest id is returned among all or any random doc
         res.send(users);
     }
     catch(err){
-        res.status(404).send("something went wrong");
+        res.status(404).send("something went wrong"+ err);
     }
 });
 
@@ -32,7 +36,7 @@ app.get("/feed", async(req,res)=>{
         res.send(users);
     }
     catch(err){
-        res.status(404).send("something went wrong");
+        res.status(404).send("something went wrong"+ err);
     }
 });
 
@@ -43,18 +47,18 @@ app.delete("/user",async(req,res)=>{
         res.send("users deleted successfully");
     }
     catch(err){
-        res.status(404).send("something went wrong");
+        res.status(404).send("something went wrong"+ err);
     }
 });
 
 //update datatbase docs
 app.patch("/user", async(req,res)=>{
     try{
-        await User.findByIdAndUpdate(req.body.userId,req.body);
+        await User.findByIdAndUpdate(req.body.userId,req.body, {runValidators:true});//if any feilds does not match model- those feilds are not added or updated to db
         res.send("updated successfully");
     }
     catch(err){
-        res.status(404).send("something went wrong");
+        res.status(404).send("something went wrong"+ err);
     }
 });
 
