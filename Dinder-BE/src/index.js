@@ -3,8 +3,11 @@ const connectDB = require("./config/Database");
 const app = express();
 const User = require("./models/user");//model
 const bcrypt = require("bcrypt");  
+const cookieParser = require('cookie-parser');
+const jwt = require('jsonwebtoken');
 
 app.use(express.json());//built-in middleware function in Express - parses incoming req json data 
+app.use(cookieParser());//to parse cookie
 
 //saving data to database
 app.post("/signup",async(req,res)=>{
@@ -43,6 +46,11 @@ app.post('/login',async(req,res)=>{
     const isMatch = await bcrypt.compare(password, user.password);
     if(!isMatch){
         throw new Error("Invalid credentials");
+    }else{
+        //generate JWT token
+        const jwtToken = jwt.sign({ _id: user._id }, 'dinder-be@12345');
+        //send it to client inside cookie
+        res.cookie("token", jwtToken);
     }
     res.send("Login successful");
     }catch(err){
@@ -50,12 +58,16 @@ app.post('/login',async(req,res)=>{
     }
 });
 
-//getting user by emailId
-app.get("/user", async(req,res)=>{
+//getting user by Id
+app.get("/profile", async(req,res)=>{
     try{
-        const users = await User.findOne({emailId: req.body.emailId}); //returns doc with smallest id among matched ones 
-        // and if you do not pass any filter - then also doc with smallest id is returned among all or any random doc
-        res.send(users);
+        const token = req.cookies.token;
+        if(!token){
+            throw new Error("Token not found");
+        }
+        decodedMessage = jwt.verify(token, 'dinder-be@12345');
+        const user = await User.findById(decodedMessage._id);
+        res.send(user);
     }
     catch(err){
         res.status(404).send("something went wrong"+ err);
