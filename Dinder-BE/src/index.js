@@ -2,18 +2,30 @@ const express = require("express");
 const connectDB = require("./config/Database");
 const app = express();
 const User = require("./models/user");//model
+const bcrypt = require("bcrypt");  
 
 app.use(express.json());//built-in middleware function in Express - parses incoming req json data 
 
 //saving data to database
 app.post("/signup",async(req,res)=>{
+    //encrypting the password
+    const {firstName, emailId, password} = req.body;
+    const passwordHash = await bcrypt.hash(password,10);
     try{
-    const user = new User(req.body);
+    const user = new User({
+        firstName,
+        emailId,
+        password: passwordHash
+    });
     await user.save();
     res.send("user added");
     }
     catch(err){
+        if (err.code === 11000) {
+            res.status(404).send("Email already exists");
+        }else{
         res.status(404).send("something went wrong" + err);
+        }
     }
 });
 
@@ -54,6 +66,7 @@ app.delete("/user",async(req,res)=>{
 //update datatbase docs
 app.patch("/user", async(req,res)=>{
     try{
+        //never trust req.body
         const ALLOWED_UPDATES = ["age", "gender", "description", "dpUrl"];
         const isUpdateAllowed = Object.keys(req.body).every((k)=>ALLOWED_UPDATES.includes(k));
         if(!isUpdateAllowed){

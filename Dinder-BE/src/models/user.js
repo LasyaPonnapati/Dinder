@@ -20,7 +20,7 @@ const userSchema = new mongoose.Schema({
                     message: "Last name should contain only alphabets and spaces"
                 }
     },
-    emailId: { type: String, required: [true, "your emailId is mandatory to enter"], lowercase: true, trim: true,
+    emailId: { type: String, required: [true, "your emailId is mandatory to enter"], lowercase: true, trim: true, unique:true,
         validate: {
             validator: function(value) {
                 return validator.isEmail(value);
@@ -28,14 +28,12 @@ const userSchema = new mongoose.Schema({
             message: "Please enter a valid email address"
         }
     },
-    password: { type: String, required: [true, "your password is mandatory to enter"], trim: true, 
-        minLength: [8,"minimum length of password should be 8"], 
-        maxLength: [12,"maximum length of password should be 12"],
+    password: { type: String, required: [true, "your password is mandatory to enter"], trim: true,
         validate: {
             validator: function(value) {
                 return validator.isStrongPassword(value);
             },
-            message: "Password must be of minimum length 8 and maximum length 12 and must contain at least one uppercase letter, one lowercase letter, one number, and one special character"
+            message: "Please enter a strong password"
     } },
     age: { type: Number, min: [0, "Age should be positive"], max: [150, "please enter correct age"]},
     gender: { type: String, validate(value){if(!['male','female','others'].includes(value)){throw new erorr("gender invalid")}} }, //validate function only works when new doc is inserted 
