@@ -49,9 +49,9 @@ app.post('/login',async(req,res)=>{
         throw new Error("Invalid credentials");
     }else{
         //generate JWT token
-        const jwtToken = jwt.sign({ _id: user._id }, 'dinder-be@12345');
+        const jwtToken = jwt.sign({ _id: user._id }, 'dinder-be@12345',{expiresIn: '7d' });
         //send it to client inside cookie
-        res.cookie("token", jwtToken);
+        res.cookie("token", jwtToken,{expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) });
     }
     res.send("Login successful");
     }catch(err){
