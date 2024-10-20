@@ -5,6 +5,7 @@ const User = require("./models/user");//model
 const bcrypt = require("bcrypt");  
 const cookieParser = require('cookie-parser');
 const jwt = require('jsonwebtoken');
+const userAuth = require('./middlewares/Auth');
 
 app.use(express.json());//built-in middleware function in Express - parses incoming req json data 
 app.use(cookieParser());//to parse cookie
@@ -59,14 +60,9 @@ app.post('/login',async(req,res)=>{
 });
 
 //getting user by Id
-app.get("/profile", async(req,res)=>{
+app.get("/profile", userAuth, async(req,res)=>{
     try{
-        const token = req.cookies.token;
-        if(!token){
-            throw new Error("Token not found");
-        }
-        decodedMessage = jwt.verify(token, 'dinder-be@12345');
-        const user = await User.findById(decodedMessage._id);
+        const user = req.user
         res.send(user);
     }
     catch(err){
@@ -75,7 +71,7 @@ app.get("/profile", async(req,res)=>{
 });
 
 //getting all the users for the feed
-app.get("/feed", async(req,res)=>{
+app.get("/feed", userAuth, async(req,res)=>{
     try{
         const users = await User.find({});
         res.send(users);
@@ -86,7 +82,7 @@ app.get("/feed", async(req,res)=>{
 });
 
 //deleting data from database
-app.delete("/user",async(req,res)=>{
+app.delete("/user", userAuth, async(req,res)=>{
     try{
         await User.deleteMany({firstName:req.body.firstName});
         res.send("users deleted successfully");
@@ -97,7 +93,7 @@ app.delete("/user",async(req,res)=>{
 });
 
 //update datatbase docs
-app.patch("/user", async(req,res)=>{
+app.patch("/user", userAuth, async(req,res)=>{
     try{
         //never trust req.body
         const ALLOWED_UPDATES = ["age", "gender", "description", "dpUrl"];
