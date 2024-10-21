@@ -22,7 +22,7 @@ authRouter.post("/signup",async(req,res)=>{
         if (err.code === 11000) {
             res.status(404).send("Email already exists");
         }else{
-        res.status(404).send("something went wrong" + err);
+        res.status(404).send("something went wrong! " + err);
         }
     }
 });
@@ -53,8 +53,11 @@ authRouter.post('/login',async(req,res)=>{
 });
 
 //logout user
+authRouter.post("/logout", (req,res)=>{
+    res.cookie("token", null, {expires: new Date(Date.now())})
+    .send("Logout successful");
+});
 
 //update password
-
 
 module.exports = authRouter;

@@ -11,18 +11,18 @@ usersRouter.get("/feed", userAuth, async(req,res)=>{
         res.send(users);
     }
     catch(err){
-        res.status(404).send("something went wrong"+ err);
+        res.status(404).send("something went wrong! "+ err);
     }
 });
 
 //delete user 
-usersRouter.delete("/user", userAuth, async(req,res)=>{
+usersRouter.delete("/delete-user", userAuth, async(req,res)=>{
     try{
         await User.deleteMany({firstName:req.body.firstName});
         res.send("users deleted successfully");
     }
     catch(err){
-        res.status(404).send("something went wrong"+ err);
+        res.status(404).send("something went wrong! "+ err);
     }
 });
 

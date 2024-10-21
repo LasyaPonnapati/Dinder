@@ -2,7 +2,7 @@ const express = require("express");
 const connectDB = require("./config/Database");
 const cookieParser = require('cookie-parser');
 const authRouter = require("./Routes/auth");
-const usersRouter = require("./Routes/user");
+const usersRouter = require("./Routes/users");
 const requestRouter = require("./Routes/request");
 const profileRouter = require("./Routes/profile");
 

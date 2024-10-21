@@ -1,34 +1,36 @@
 const express = require("express");
 const User = require("../models/user");
 const userAuth = require('../middlewares/Auth');
+const {validateUpdate} = require("../helpers/validation");
 
 const profileRouter = express.Router();
 
 //get user profile
-profileRouter.get("/profile", userAuth, async(req,res)=>{
+profileRouter.get("/myprofile", userAuth, async(req,res)=>{
     try{
         const user = req.user
         res.send(user);
     }
     catch(err){
-        res.status(404).send("something went wrong"+ err);
+        res.status(404).send("something went wrong! "+ err);
     }
 });
 
 //update user profile
-profileRouter.patch("/user", userAuth, async(req,res)=>{
+profileRouter.patch("/update-user", userAuth, async(req,res)=>{
     try{
         //never trust req.body
-        const ALLOWED_UPDATES = ["age", "gender", "description", "dpUrl"];
-        const isUpdateAllowed = Object.keys(req.body).every((k)=>ALLOWED_UPDATES.includes(k));
+        const isUpdateAllowed = validateUpdate(req.body);
         if(!isUpdateAllowed){
-            throw new error("update not allowed for these feilds");
+            throw new Error("Invalid edit request");
         }
-        await User.findByIdAndUpdate(req.body.userId,req.body, {runValidators:true});//if any feilds does not match model- those feilds are not added or updated to db
+        loggedInUser = req.user;
+        Object.keys(req.body).forEach((key)=>{loggedInUser[key] = req.body[key]});
+        await loggedInUser.save();
         res.send("updated successfully");
     }
     catch(err){
-        res.status(404).send("something went wrong"+ err);
+        res.status(404).send("something went wrong! "+ err);
     }
 });
 
