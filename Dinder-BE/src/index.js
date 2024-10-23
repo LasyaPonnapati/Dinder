@@ -1,10 +1,10 @@
 const express = require("express");
-const connectDB = require("./config/Database");
+const connectDB = require("./config/database");
 const cookieParser = require('cookie-parser');
-const authRouter = require("./Routes/auth");
-const usersRouter = require("./Routes/users");
-const requestRouter = require("./Routes/request");
-const profileRouter = require("./Routes/profile");
+const authRouter = require("./routes/auth");
+const usersRouter = require("./routes/users");
+const requestRouter = require("./routes/request");
+const profileRouter = require("./routes/profile");
 
 const app = express();
 
