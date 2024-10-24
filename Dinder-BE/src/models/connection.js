@@ -19,7 +19,7 @@ const connectionRequestSchema = mongoose.Schema({
 }, {timestamps: true});
 
 //compound index
-userSchema.index({senderId: 1, receiverId: 1});
+connectionRequestSchema.index({senderId: 1, receiverId: 1});
 
 //middleware
 connectionRequestSchema.pre("save",function (next){
