@@ -1,6 +1,6 @@
 const express = require("express");
 const userAuth = require("../middlewares/auth");
-const ConnectionRequest = require("../models/connection");   
+const ConnectionRequest = require("../models/connection");
 const User = require("../models/user");
 
 const requestRouter = express.Router();
@@ -53,9 +53,9 @@ requestRouter.post("/review/:status/:requestId", userAuth, async(req,res)=>{
         if(!ALLOWED_STATUS.includes(status)){
             throw new Error("Invalid status!");
         } 
-        const connectionRequest = await connectionRequest.findOne({
+        const connectionRequest = await ConnectionRequest.findOne({
             _id: requestId, 
-            toUserId: loggedInUser._id, 
+            receiverId: loggedInUser._id, 
             status: "interested"});
 
         if(!connectionRequest){
