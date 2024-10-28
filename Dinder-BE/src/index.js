@@ -8,8 +8,8 @@ const profileRouter = require("./routes/profile");
 
 const app = express();
 
-app.use(express.json());//built-in middleware function in Express - parses incoming req ka json data 
-app.use(cookieParser());//to parse cookie
+app.use(express.json()); 
+app.use(cookieParser());
 
 app.use("/api/auth",authRouter);
 app.use("/api/users",usersRouter);

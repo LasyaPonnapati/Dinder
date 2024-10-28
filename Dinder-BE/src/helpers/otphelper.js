@@ -3,29 +3,30 @@ const nodemailer = require("nodemailer");
 const transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
-      user: "lasyaponnapati@gmail.com",
-      pass: "tylqpuvtsxqncxah",
-    },
+      user: "",//emailId of the email from which you want to send the email
+      pass: "",//password
+    },  
 });
 
 const generateOTP = () => {
     return Math.floor(100000 + Math.random() * 900000);
 };
 
-const sendOTPtoEmail = (otpRefer, user, res) =>{
+const sendOTPtoEmail = (otpGenerated, user, res) =>{
     const mailOptions = {
-        from: "lasyaponnapati@gmail.com",
+        from: "",//from emailId
         to: user.emailId,
         subject: "Your Password Reset OTP",
-        text: `Your OTP for password reset is: ${otpRefer.otp}. It is valid for 5 minutes.`,
+        text: `Your OTP for password reset is: ${otpGenerated}. It is valid for 5 minutes.`,
     };
     transporter.sendMail(mailOptions, () => {
-        res.send("OTP sent successfully");
+        res.status(200).json({message: "OTP sent successfully"});
     });
 };
 
 const validateOTP = (userEnteredOTP,systemSavedOTPModel) => {
-    return (userEnteredOTP === systemSavedOTPModel.otp && !systemSavedOTPModel.isValidated && systemSavedOTPModel.expires > Date.now())
+    const isOTPsMatching = bcrypt.compare(userEnteredOTP, systemSavedOTP);
+    return (isOTPsMatching && !systemSavedOTPModel.isValidated && systemSavedOTPModel.expires > Date.now())
 };
 
 module.exports = {sendOTPtoEmail, generateOTP, validateOTP};

@@ -17,13 +17,13 @@ authRouter.post("/signup",async(req,res)=>{
         password: passwordHash
     });
     await user.save();
-    res.send("user added");
+    res.status(200).json({ message: "User added successfully!", user: user });
     }
     catch(err){
         if (err.code === 11000) {
-            res.status(404).send("Email already exists");
+            res.status(400).json({message: "Email already exists!"});
         }else{
-        res.status(404).send("something went wrong! " + err);
+        res.status(500).json({message: `something went wrong! ${err.message}`});
         }
     }
 });
@@ -47,16 +47,16 @@ authRouter.post('/login',async(req,res)=>{
         //send it to client inside cookie
         res.cookie("token", token,{expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) });
     }
-    res.send("Login successful");
+    res.status(200).json({message:"Login successful", user: user});
     }catch(err){
-        res.status(404).send("something went wrong! " + err);
+        res.status(500).json({message: `something went wrong! ${err.message}`});
     }
 });
 
 //logout user
 authRouter.post("/logout", (req,res)=>{
     res.cookie("token", null, {expires: new Date(Date.now())})
-    .send("Logout successful");
+    .josn({message:"Logout successful"});
 });
 
 //update password
@@ -67,11 +67,12 @@ authRouter.post("/send-otp", async(req,res)=>{
         throw new Error("User not found");
     }
     const otpGenerated = generateOTP();
-    const otpRefer = new OtpModel({userId: user._id, otp: otpGenerated});
+    const otpHash = await bcrypt.hash(otpGenerated, 10);
+    const otpRefer = new OtpModel({userId: user._id, otp: otpHash});
     await otpRefer.save();
-    sendOTPtoEmail(otpRefer, user, res);
+    sendOTPtoEmail(otpGenerated, user, res);  
     }catch(err){
-        res.status(404).send("something went wrong! " + err);
+        res.status(500).json({message: `something went wrong! ${err.message}`});
     }
 });
 
@@ -85,21 +86,22 @@ authRouter.post("/verify-otp", async(req, res) => {
     if (!isOTPValid) {
         throw new Error("Invalid OTP");
     } 
-    res.send("OTP verified successfully");
+    res.status(200).json({message: "OTP verified successfully"});
     }catch(err){
-        res.status(404).send("something went wrong! " + err);
+        res.status(500).json({message: `something went wrong! ${err.message}`});
     }
 });
 
 authRouter.patch("/update-password", async (req,res)=>{
     try{
     const {email, newPassword} = req.body;
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
     const user = await User.findOne({emailId: email});
-    user.password = newPassword;
+    user.password = hashedPassword;
     await user.save();
-    res.send("Password updated successfully");
+    res.status(200).json({message: "Password updated successfully"});
     }catch(err){
-        res.status(404).send("something went wrong! " + err);
+        res.status(500).json({message: `something went wrong! ${err.message}`});
     }
 });
 
