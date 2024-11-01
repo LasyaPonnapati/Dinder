@@ -5,6 +5,7 @@ const User = require("../models/user");
 
 const requestRouter = express.Router();
 
+//sender actions
 requestRouter.post("/:status/:receiverId", userAuth, async(req,res)=>{
     try{
     const senderId = req.user._id;
@@ -35,14 +36,14 @@ requestRouter.post("/:status/:receiverId", userAuth, async(req,res)=>{
         }
 
     const connectionRequest = new ConnectionRequest({senderId, receiverId, status});
-
     await connectionRequest.save();
-    res.send("connection request sent successfully!");
+    res.status(200).json({message: `connection request ${status} successfully!`});
     }catch(err){
-        res.status(404).send("something went wrong! " + err);
+        res.status(500).json({message: `something went wrong! ${err.message}`});
     }
 });
 
+//receiver actions
 requestRouter.post("/review/:status/:requestId", userAuth, async(req,res)=>{
     try{
         const loggedInUser = req.user;
@@ -64,10 +65,10 @@ requestRouter.post("/review/:status/:requestId", userAuth, async(req,res)=>{
 
         connectionRequest.status = status;
         await connectionRequest.save();
-        res.send(`connection request ${status} successfully!`);
+        res.status(200).json({message: `connection request ${status} successfully!`});
         
     }catch(err){
-        res.status(404).send("something went wrong! " + err);
+        res.status(500).json({message: `something went wrong! ${err.message}`});
     }
 });
 

@@ -9,10 +9,10 @@ const profileRouter = express.Router();
 profileRouter.get("/myprofile", userAuth, async(req,res)=>{
     try{
         const user = req.user
-        res.send(user);
+        res.status(200).json({User: user});
     }
     catch(err){
-        res.status(404).send("something went wrong! "+ err);
+        res.status(500).json({message: `something went wrong! ${err.message}`});
     }
 });
 
@@ -27,10 +27,10 @@ profileRouter.patch("/update-user", userAuth, async(req,res)=>{
         loggedInUser = req.user;
         Object.keys(req.body).forEach((key)=>{loggedInUser[key] = req.body[key]});
         await loggedInUser.save();
-        res.send("updated successfully");
+        res.status(200).json({message: "updated successfully", updatedUserDetails: loggedInUser});
     }
     catch(err){
-        res.status(404).send("something went wrong! "+ err);
+        res.status(500).json({message: `something went wrong! ${err.message}`});
     }
 });
 

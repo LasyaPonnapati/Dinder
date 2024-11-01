@@ -12,9 +12,9 @@ usersRouter.get("/sent", userAuth, async (req, res)=>{
         const user = await User.findById(loggedInUser._id);
         const connectionRequests = await connectionRequest.find({senderId: user._id, status: "interested"})
         .populate("receiverId", ["firstName", "lastName", "dpUrl"]);
-        res.send(connectionRequests);
+        res.status(200).json({sentConnectionRequests: connectionRequests});
     }catch(err){
-        res.status(404).send("something went wrong! "+ err);
+        res.status(500).json({message: `something went wrong! ${err.message}`});
     }
 });
 usersRouter.get("/received", userAuth, async (req, res)=>{
@@ -23,9 +23,9 @@ usersRouter.get("/received", userAuth, async (req, res)=>{
         const user = await User.findById(loggedInUser._id);
         const connectionRequests = await connectionRequest.find({receiverId: user._id, status: "interested"})
         .populate("senderId", ["firstName", "lastName", "dpUrl", "gender", "age", "description", "skills"]);
-        res.send(connectionRequests);
+        res.status(200).json({ReceivedConnectionRequests: connectionRequests});
     }catch(err){
-        res.status(404).send("something went wrong! "+ err);
+        res.status(500).json({message: `something went wrong! ${err.message}`});
     }
 });
 
@@ -49,9 +49,9 @@ usersRouter.get("/connections", userAuth, async (req, res) => {
             return connection.senderId;
         })
         
-        res.send(data);
-    } catch (err) {
-        res.status(404).send("Something went wrong! " + err);
+        res.status(200).json({allConnections: data});
+    }catch(err){
+        res.status(500).json({message: `something went wrong! ${err.message}`});
     }
 });
 
@@ -68,9 +68,9 @@ usersRouter.get("/feed", userAuth, async (req, res)=>{
         const feed = await User.find({
             _id: { $nin: [...connectionIds, loggedInUser._id] }
         }).select("firstName lastName dpUrl gender age description skills");
-        res.send(feed);
+        res.status(200).json({feed: feed});
     }catch(err){
-        res.status(404).send("something went wrong! "+ err);
+        res.status(500).json({message: `something went wrong! ${err.message}`});
     }
 });
 
