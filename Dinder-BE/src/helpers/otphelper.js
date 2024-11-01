@@ -25,8 +25,8 @@ const sendOTPtoEmail = (otpGenerated, user, res) =>{
 };
 
 const validateOTP = (userEnteredOTP,systemSavedOTPModel) => {
-    const isOTPsMatching = bcrypt.compare(userEnteredOTP, systemSavedOTP);
-    return (isOTPsMatching && !systemSavedOTPModel.isValidated && systemSavedOTPModel.expires > Date.now())
+    const isOTPsMatching = userEnteredOTP === systemSavedOTPModel.otp;
+    return (isOTPsMatching && !systemSavedOTPModel.isValidated && systemSavedOTPModel.expires >= Date.now())
 };
 
 module.exports = {sendOTPtoEmail, generateOTP, validateOTP};

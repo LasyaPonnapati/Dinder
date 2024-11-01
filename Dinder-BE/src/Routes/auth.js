@@ -39,7 +39,7 @@ authRouter.post('/login',async(req,res)=>{
     if(!user){
         throw new Error("User not found");
     }
-    const isMatch = user.validatePassword(password);
+    const isMatch = await user.validatePassword(password);
     if(!isMatch){
         throw new Error("Invalid credentials");
     }else{
@@ -56,7 +56,7 @@ authRouter.post('/login',async(req,res)=>{
 //logout user
 authRouter.post("/logout", (req,res)=>{
     res.cookie("token", null, {expires: new Date(Date.now())})
-    .josn({message:"Logout successful"});
+    .json({message:"Logout successful"});
 });
 
 //update password
@@ -66,13 +66,18 @@ authRouter.post("/send-otp", async(req,res)=>{
     if(!user){
         throw new Error("User not found");
     }
+    await OtpModel.deleteMany({ userId: user._id });
     const otpGenerated = generateOTP();
-    const otpHash = await bcrypt.hash(otpGenerated, 10);
-    const otpRefer = new OtpModel({userId: user._id, otp: otpHash});
+    const expiresIn = 300 * 1000;
+    const otpRefer = new OtpModel({
+        userId: user._id,
+        otp: otpGenerated,
+        expires: Date.now() + expiresIn
+    });
     await otpRefer.save();
     sendOTPtoEmail(otpGenerated, user, res);  
     }catch(err){
-        res.status(500).json({message: `something went wrong! ${err.message}`});
+        res.status(500).json({error: `something went wrong! ${err.message}`});
     }
 });
 
@@ -80,12 +85,20 @@ authRouter.post("/verify-otp", async(req, res) => {
     try{
     const { email, otp } = req.body;
     const user = await User.findOne({ emailId: email });
+    if(!user){
+        throw new Error("User not found");
+    }
     const userEnteredOTP = otp;
     const systemSavedOTPModel = await OtpModel.findOne({ userId: user._id });
+    if(!systemSavedOTPModel){
+        throw new Error("OTP not found");
+    }
     const isOTPValid = validateOTP(userEnteredOTP, systemSavedOTPModel);
     if (!isOTPValid) {
         throw new Error("Invalid OTP");
-    } 
+    }
+    systemSavedOTPModel.isValidated = true;
+    await systemSavedOTPModel.save();
     res.status(200).json({message: "OTP verified successfully"});
     }catch(err){
         res.status(500).json({message: `something went wrong! ${err.message}`});
@@ -95,11 +108,25 @@ authRouter.post("/verify-otp", async(req, res) => {
 authRouter.patch("/update-password", async (req,res)=>{
     try{
     const {email, newPassword} = req.body;
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
     const user = await User.findOne({emailId: email});
+    if(!user){
+        throw new Error("User not found");
+    }
+    const otpModel = await OtpModel.findOne({userId: user._id});
+    if(!otpModel){
+        throw new Error("OTP not found");
+    }
+    const isOTPValidated = otpModel.isValidated;
+    if(!isOTPValidated){
+        throw new Error("password update not allowed!");
+    }
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
     user.password = hashedPassword;
     await user.save();
-    res.status(200).json({message: "Password updated successfully"});
+    console.log(user);
+    await otpModel.deleteOne({userId: user._id});
+    res.cookie("token", null, {expires: new Date(Date.now())}).status(200)
+    .json({message:"password updated successfully! please login again!"});
     }catch(err){
         res.status(500).json({message: `something went wrong! ${err.message}`});
     }
