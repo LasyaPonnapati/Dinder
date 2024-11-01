@@ -60,6 +60,10 @@ usersRouter.get("/connections", userAuth, async (req, res) => {
 //get feed 
 usersRouter.get("/feed", userAuth, async (req, res)=>{
     try{
+        const page = parseInt(req.query.page) || 1; 
+        const limit = parseInt(req.query.limit) || 10; 
+        limit = limit > 50 ? 50 : limit; 
+        const skip = (page - 1) * limit;
         const loggedInUser = req.user;
         const connections = await connectionRequest.find({$or:[{senderId: loggedInUser._id},{receiverId: loggedInUser._id}]});
         const connectionIds = connections.map((connection)=>{
@@ -67,7 +71,7 @@ usersRouter.get("/feed", userAuth, async (req, res)=>{
         });
         const feed = await User.find({
             _id: { $nin: [...connectionIds, loggedInUser._id] }
-        }).select("firstName lastName dpUrl gender age description skills");
+        }).select("firstName lastName dpUrl gender age description skills").skip(skip).limit(limit);
         res.status(200).json({feed: feed});
     }catch(err){
         res.status(500).json({message: `something went wrong! ${err.message}`});
