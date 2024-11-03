@@ -8,8 +8,10 @@ const profileRouter = express.Router();
 //get user profile
 profileRouter.get("/myprofile", userAuth, async(req,res)=>{
     try{
-        const user = req.user
-        res.status(200).json({User: user});
+        const userId = req.user._id;
+        const loggedInUser = await User.findById(userId)
+            .select("firstName lastName emailId age gender dpUrl description skills"); 
+        res.status(200).json({loggedInUser: loggedInUser});
     }
     catch(err){
         res.status(500).json({message: `something went wrong! ${err.message}`});

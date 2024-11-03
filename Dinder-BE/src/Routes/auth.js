@@ -9,6 +9,9 @@ const authRouter = express.Router();
 authRouter.post("/signup",async(req,res)=>{
     //encrypting the password
     const {firstName, emailId, password} = req.body;
+    if(!firstName || !emailId || !password){
+        throw new Error("First name, emailId, and password are required to sign up!");
+    }
     const passwordHash = await bcrypt.hash(password,10);
     try{
     const user = new User({
@@ -17,7 +20,11 @@ authRouter.post("/signup",async(req,res)=>{
         password: passwordHash
     });
     await user.save();
-    res.status(200).json({ message: "User added successfully!", user: user });
+    const userResponse = {
+        firstName: user.firstName,
+        emailId: user.emailId
+    };
+    res.status(200).json({ message: "User added successfully!", user: userResponse });
     }
     catch(err){
         if (err.code === 11000) {
@@ -47,7 +54,15 @@ authRouter.post('/login',async(req,res)=>{
         //send it to client inside cookie
         res.cookie("token", token,{expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) });
     }
-    res.status(200).json({message:"Login successful", user: user});
+    const userResponse = {
+        firstName: user.firstName,
+        lastName: user.lastName,
+        emailId: user.emailId,
+        dpUrl: user.dpUrl,
+        skills: user.skills,
+        description: user.description,
+    }
+    res.status(200).json({message:"Login successful", user: userResponse});
     }catch(err){
         res.status(500).json({message: `something went wrong! ${err.message}`});
     }
