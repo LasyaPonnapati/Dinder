@@ -3,8 +3,8 @@ const nodemailer = require("nodemailer");
 const transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
-      user: "lasyaponnapati@gmail.com",//emailId of the email from which you want to send the email
-      pass: "tylqpuvtsxqncxah",//password
+      user: "",//emailId of the email from which you want to send the email
+      pass: "",//password
     },  
 });
 
@@ -14,7 +14,7 @@ const generateOTP = () => {
 
 const sendOTPtoEmail = (otpGenerated, user, res) =>{
     const mailOptions = {
-        from: "lasyaponnapati@gmail.com",//from emailId
+        from: "",//from emailId
         to: user.emailId,
         subject: "Your Password Reset OTP",
         text: `Your OTP for password reset is: ${otpGenerated}. It is valid for 5 minutes.`,
